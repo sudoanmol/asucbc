@@ -88,6 +88,18 @@ export const getNavigationItems = (): NavigationItem[] => {
       variant: "default",
     },
     
+    {
+      label: "Apply",
+      href: "/apply",
+      description: "Apply to join ASU Claude Builder Club",
+      category: "main",
+      showInHeader: true,
+      showInCommandMenu: true,
+      keywords: ["apply", "application", "join", "member"],
+      icon: "📝",
+      umamiEvent: "Nav - Apply",
+      variant: "default",
+    },
     // Conditional pages
     {
       label: "Hackathon",
