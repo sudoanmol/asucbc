@@ -117,7 +117,7 @@ export const teamMembers: TeamMember[] = [
     id: "wenzel",
     name: "Wenzel Escudero",
     position: "Technology",
-    image: "/staff/claude.svg",
+    image: "/staff/wenzel.png",
     linkedinUrl: "https://www.linkedin.com/in/wenzelescudero",
     websiteUrl: "https://wnzel.com/",
     description:
