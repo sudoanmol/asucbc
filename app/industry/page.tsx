@@ -113,6 +113,12 @@ export default function IndustryPage() {
                 >
                   Contact Us
                 </Link>
+                <Link
+                  href="/sponsor"
+                  className="inline-flex items-center justify-center rounded-xl border-2 border-[var(--theme-card-border)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--theme-text-primary)] shadow-lg transition hover:scale-[1.02] hover:border-[var(--theme-text-accent)]/30 hover:bg-[var(--theme-text-accent)]/5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-text-accent)]"
+                >
+                  Sponsorship Package
+                </Link>
               </div>
             </motion.div>
 

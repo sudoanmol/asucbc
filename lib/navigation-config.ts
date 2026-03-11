@@ -100,6 +100,17 @@ export const getNavigationItems = (): NavigationItem[] => {
       umamiEvent: "Nav - Apply",
       variant: "default",
     },
+    {
+      label: "Sponsor",
+      href: "/sponsor",
+      description: "HackASU sponsorship package",
+      category: "main",
+      showInHeader: false,
+      showInCommandMenu: true,
+      keywords: ["sponsor", "sponsorship", "hackasu", "package", "partner"],
+      icon: "\u2728",
+      umamiEvent: "Nav - Sponsor",
+    },
     // Conditional pages
     {
       label: "Hackathon",

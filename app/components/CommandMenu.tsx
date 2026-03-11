@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { Command } from "cmdk";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { getGroupedCommandMenuItems, type NavigationItem } from "@/lib/navigation-config";
@@ -99,7 +100,9 @@ export default function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
       onOpenChange={onOpenChange}
       overlayClassName="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99]"
       contentClassName="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-2xl z-[101] px-4"
+      label="Navigation menu"
     >
+      <DialogTitle className="sr-only">Navigation menu</DialogTitle>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: -20 }}
         animate={open ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: -20 }}
