@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Heading, Text, Label, Input, Button, ButtonGroup } from "./ui";
+import { Heading, Text, Label, Input, Button, ButtonGroup, Toggle } from "./ui";
 import HackathonCongratulations from "./HackathonCongratulations";
 import Link from "next/link";
 
@@ -13,6 +13,8 @@ interface FormData {
   lookingForTeam: boolean;
   major: string;
   github: string;
+  linkedin: string;
+  registrationType: "hackathon" | "caseCompetition";
 }
 
 interface FormErrors {
@@ -22,6 +24,7 @@ interface FormErrors {
   year?: string;
   major?: string;
   github?: string;
+  linkedin?: string;
 }
 
 export default function Hackathon2SignupForm() {
@@ -33,6 +36,8 @@ export default function Hackathon2SignupForm() {
     lookingForTeam: false,
     major: '',
     github: '',
+    linkedin: '',
+    registrationType: "hackathon",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -40,6 +45,7 @@ export default function Hackathon2SignupForm() {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
+  const [successType, setSuccessType] = useState<"hackathon" | "caseCompetition">("hackathon");
 
   // Function to reset form and go back to registration
   const handleReset = () => {
@@ -52,6 +58,8 @@ export default function Hackathon2SignupForm() {
       lookingForTeam: false,
       major: '',
       github: '',
+      linkedin: '',
+      registrationType: "hackathon",
     });
   };
 
@@ -80,7 +88,7 @@ export default function Hackathon2SignupForm() {
       newErrors.major = "Major is required";
     }
 
-    if (!formData.github.trim()) {
+    if (formData.registrationType === "hackathon" && !formData.github.trim()) {
       newErrors.github = "GitHub username is required";
     }
 
@@ -118,6 +126,8 @@ export default function Hackathon2SignupForm() {
       formDataToSend.append('lookingForTeam', String(formData.lookingForTeam));
       formDataToSend.append('major', formData.major);
       formDataToSend.append('github', formData.github);
+      formDataToSend.append('linkedin', formData.linkedin);
+      formDataToSend.append('registrationType', formData.registrationType);
       formDataToSend.append('hackathonId', 'hackathon2');
 
       const response = await fetch('/api/hackathon2', {
@@ -126,12 +136,14 @@ export default function Hackathon2SignupForm() {
       });
 
       if (response.ok) {
+        setSuccessType(formData.registrationType);
         setSubmitStatus("success");
         // Track successful submission
         if (typeof window !== 'undefined' && (window as any).umami) {
           (window as any).umami.track('Hackathon2 Form Submitted', {
             year: formData.year,
-            lookingForTeam: formData.lookingForTeam
+            lookingForTeam: formData.lookingForTeam,
+            registrationType: formData.registrationType,
           });
         }
         setFormData({
@@ -142,6 +154,8 @@ export default function Hackathon2SignupForm() {
           lookingForTeam: false,
           major: '',
           github: '',
+          linkedin: '',
+          registrationType: "hackathon",
         });
       } else {
         setSubmitStatus("error");
@@ -160,14 +174,16 @@ export default function Hackathon2SignupForm() {
 
   // Show congratulations screen on success
   if (submitStatus === "success") {
-    return <HackathonCongratulations onReset={handleReset} hackathonName="Claude Builder Club Hackathon 2026" eventDates="March 20-22, 2026" />;
+    return <HackathonCongratulations onReset={handleReset} hackathonName={successType === "caseCompetition" ? "Claude Builder Club Case Competition 2026" : "Claude Builder Club Hackathon 2026"} eventDates="March 20-22, 2026" />;
   }
 
   return (
     <div className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-16">
       <div className="mb-8">
         <Heading level="h2" animate={false} className="mb-4">
-          Hackathon Registration Form
+          {formData.registrationType === "caseCompetition"
+            ? "Case Competition Registration Form"
+            : "Hackathon Registration Form"}
         </Heading>
         <Text size="sm" variant="secondary">
           All fields marked with * are required.
@@ -177,6 +193,25 @@ export default function Hackathon2SignupForm() {
         <div className="mt-4 p-4 bg-[var(--theme-text-accent)]/10 rounded-lg border-l-4 border-[var(--theme-text-accent)]">
           <Text size="sm" className="font-semibold text-[var(--theme-text-primary)]">
             <span className="text-[var(--theme-text-accent)]">⚠️ Important:</span> If you're registered on SDC (Sun Devil Connect), you must also register here to confirm your attendance.
+          </Text>
+        </div>
+
+        {/* Registration Type Toggle */}
+        <div
+          className="mt-4 flex items-center gap-3 cursor-pointer"
+          onClick={() => {
+            const next = formData.registrationType === "caseCompetition" ? "hackathon" : "caseCompetition";
+            setFormData((prev) => ({ ...prev, registrationType: next }));
+            setErrors((prev) => ({ ...prev, github: undefined, linkedin: undefined }));
+          }}
+        >
+          <Toggle
+            checked={formData.registrationType === "caseCompetition"}
+            onChange={() => {}}
+          />
+          <Text size="sm" variant="secondary" className="flex-1">
+            <span className="font-bold text-[var(--theme-text-primary)]">Switch to Case Competition Registration</span>{" "}
+            <span className="text-[var(--theme-text-accent)]">(winner may be interviewed by sponsor)</span>
           </Text>
         </div>
       </div>
@@ -333,25 +368,45 @@ export default function Hackathon2SignupForm() {
           />
         </div>
 
-        {/* GitHub */}
-        <div>
-          <Label htmlFor="github" required>
-            GitHub Username
-          </Label>
-          <Input
-            type="text"
-            id="github"
-            name="github"
-            value={formData.github}
-            onChange={handleInputChange}
-            error={errors.github}
-            placeholder="your-github-username"
-            fullWidth
-          />
-          <Text size="xs" variant="secondary" className="mt-1">
-            We'll use this to verify your project submissions
-          </Text>
-        </div>
+        {/* GitHub (hackathon) or LinkedIn (case competition) */}
+        {formData.registrationType === "hackathon" ? (
+          <div>
+            <Label htmlFor="github" required>
+              GitHub Username
+            </Label>
+            <Input
+              type="text"
+              id="github"
+              name="github"
+              value={formData.github}
+              onChange={handleInputChange}
+              error={errors.github}
+              placeholder="your-github-username"
+              fullWidth
+            />
+            <Text size="xs" variant="secondary" className="mt-1">
+              We'll use this to verify your project submissions
+            </Text>
+          </div>
+        ) : (
+          <div>
+            <Label htmlFor="linkedin">
+              LinkedIn Profile URL
+            </Label>
+            <Input
+              type="text"
+              id="linkedin"
+              name="linkedin"
+              value={formData.linkedin}
+              onChange={handleInputChange}
+              placeholder="https://linkedin.com/in/your-profile"
+              fullWidth
+            />
+            <Text size="xs" variant="secondary" className="mt-1">
+              Optional — helps sponsors connect with you
+            </Text>
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="pt-6">
@@ -388,7 +443,9 @@ export default function Hackathon2SignupForm() {
                 Submitting...
               </span>
             ) : (
-              "Submit Registration"
+              formData.registrationType === "caseCompetition"
+                ? "Submit Case Competition Registration"
+                : "Submit Registration"
             )}
           </Button>
         </div>

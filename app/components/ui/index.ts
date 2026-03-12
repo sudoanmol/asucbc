@@ -12,6 +12,9 @@ export { Heading, Text, Label } from "./Typography";
 export { default as Input } from "./Input";
 export type { InputProps } from "./Input";
 
+export { default as Toggle } from "./Toggle";
+export type { ToggleProps } from "./Toggle";
+
 export { default as Textarea } from "./Textarea";
 export type { TextareaProps } from "./Textarea";
 

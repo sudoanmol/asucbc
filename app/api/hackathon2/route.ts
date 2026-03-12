@@ -34,24 +34,42 @@ export async function POST(request: NextRequest) {
     const lookingForTeam = formData.get("lookingForTeam") === "true";
     const major = formData.get("major") as string;
     const github = formData.get("github") as string;
+    const linkedin = formData.get("linkedin") as string;
+    const registrationType = (formData.get("registrationType") as string) || "hackathon";
+    const isCaseCompetition = registrationType === "caseCompetition";
 
     // Validate required fields
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !year ||
-      !major ||
-      !github
-    ) {
+    if (!firstName || !lastName || !email || !year || !major) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    if (!isCaseCompetition && !github) {
+      return NextResponse.json(
+        { error: "GitHub username is required for hackathon registration" },
+        { status: 400 }
+      );
+    }
+
+    const registrationLabel = isCaseCompetition ? "Case Competition" : "Hackathon 2";
+
     const hookURL = process.env.DISCORD_HACKATHON2_WEBHOOK_URL;
     if (hookURL) {
+      const discordFields = [
+        { name: "Registration Type", value: registrationLabel, inline: true },
+        { name: "First Name", value: firstName, inline: true },
+        { name: "Last Name", value: lastName, inline: true },
+        { name: "Email", value: email },
+        { name: "Year", value: year, inline: true },
+        { name: "Major", value: major, inline: true },
+        ...(isCaseCompetition
+          ? (linkedin ? [{ name: "LinkedIn", value: linkedin, inline: true }] : [])
+          : [{ name: "GitHub", value: github, inline: true }]),
+        { name: "Looking for Team", value: lookingForTeam ? "Yes" : "No", inline: true },
+      ];
+
       // Send data to Discord webhook
       await fetch(hookURL, {
         method: "POST",
@@ -59,20 +77,12 @@ export async function POST(request: NextRequest) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: "New Hackathon 2 Signup",
+          content: `New ${registrationLabel} Signup`,
           embeds: [
             {
-              title: "New Hackathon 2 Registration Received",
-              color: 16763802,
-              fields: [
-                { name: "First Name", value: firstName, inline: true },
-                { name: "Last Name", value: lastName, inline: true },
-                { name: "Email", value: email },
-                { name: "Year", value: year, inline: true },
-                { name: "Major", value: major, inline: true },
-                { name: "GitHub", value: github, inline: true },
-                { name: "Looking for Team", value: lookingForTeam ? "Yes" : "No", inline: true },
-              ],
+              title: `New ${registrationLabel} Registration Received`,
+              color: isCaseCompetition ? 3447003 : 16763802,
+              fields: discordFields,
               timestamp: new Date().toISOString(),
               thumbnail: { url: "https://asucbc.vercel.app/staff/claude.svg" },
             },
@@ -84,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const emailContent = `
-New Hackathon 2 Registration Received
+New ${registrationLabel} Registration Received
 
 Personal Information:
 - First Name: ${firstName}
@@ -92,7 +102,9 @@ Personal Information:
 - Email: ${email}
 - Year: ${year}
 - Major: ${major}
-- GitHub: ${github}
+${isCaseCompetition
+  ? `- LinkedIn: ${linkedin || "Not provided"}`
+  : `- GitHub: ${github}`}
 - Looking for Team: ${lookingForTeam ? "Yes" : "No"}
 
 Registration submitted on: ${new Date().toLocaleString()}
@@ -104,13 +116,15 @@ Registration submitted on: ${new Date().toLocaleString()}
     if (process.env.GOOGLE_APPS_SCRIPT_URL_HACKATHON2) {
       console.log("Attempting to save to Google Sheets...");
       const sheetsData = {
+        registrationType: registrationLabel,
         firstName,
         lastName,
         email,
         year,
         lookingForTeam,
         major,
-        github,
+        github: github || "",
+        linkedin: linkedin || "",
       };
 
       try {
@@ -154,7 +168,9 @@ Registration submitted on: ${new Date().toLocaleString()}
       const mailOptions = {
         from: process.env.SMTP_USER,
         to: process.env.RECIPIENT_EMAIL || "shivenshekar01@gmail.com",
-        subject: `🚀 New Hackathon 2 Registration: ${firstName} ${lastName}`,
+        subject: isCaseCompetition
+          ? `🏆 New Case Competition Registration: ${firstName} ${lastName}`
+          : `🚀 New Hackathon 2 Registration: ${firstName} ${lastName}`,
         text: emailContent,
       };
 
@@ -164,7 +180,7 @@ Registration submitted on: ${new Date().toLocaleString()}
     }
 
     return NextResponse.json(
-      { message: "Hackathon 2 registration submitted successfully" },
+      { message: `${registrationLabel} registration submitted successfully` },
       { status: 200 }
     );
   } catch (error) {
