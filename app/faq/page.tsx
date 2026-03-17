@@ -1,5 +1,3 @@
-"use client";
-
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Card, Heading, Text } from "../components/ui";
@@ -43,7 +41,7 @@ const FAQ_ITEMS: ReadonlyArray<FaqItem> = [
   },
   {
     question:
-      "I filled out and submitted the form at /apply. Why do I still not have access?",
+      "I filled out and submitted the form at /redeem. Why do I still not have access?",
     answer:
       "Submitting the application alone is not enough. You must attend a meeting in person to receive access.",
   },
