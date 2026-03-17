@@ -120,10 +120,10 @@ export default function SubmitResourcePage() {
           {submitStatus === "success" && (
             <Card gradient className="mb-8 text-center">
               <Heading level="h3" animate={false} className="mb-2">
-                Submitted for review
+                Resource submitted
               </Heading>
               <Text variant="secondary" className="mb-4">
-                Thanks! Your resource will appear once a maintainer merges it.
+                Thanks. Your resource has been saved to our submissions database.
               </Text>
               <Link href="/resources">
                 <Button type="button" variant="secondary">
@@ -135,7 +135,7 @@ export default function SubmitResourcePage() {
 
           {submitStatus === "error" && (
             <div className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              Something went wrong. Please check your connection and try again.
+              Something went wrong while saving your resource. Please try again.
             </div>
           )}
 

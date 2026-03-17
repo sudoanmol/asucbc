@@ -1,78 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Resource } from "@/types/resource";
+import { getDb } from "@/db";
+import { resourceSubmissions } from "@/db/schema";
 import { checkRateLimit, getIp, rateLimiters } from "@/lib/ratelimit";
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+interface ResourceSubmission {
+  title: string;
+  link: string;
+  description: string;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const getTextField = (value: unknown): string =>
+  typeof value === "string" ? value.trim() : "";
+
+const parseSubmission = (value: unknown): ResourceSubmission | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  return {
+    title: getTextField(value.title),
+    link: getTextField(value.link),
+    description: getTextField(value.description),
+  };
+};
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await checkRateLimit(rateLimiters.resourcesSubmit, getIp(request));
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const body: unknown = await request.json();
+    let body: unknown;
 
-    if (typeof body !== "object" || body === null) {
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { title, link, description } = body as Record<string, unknown>;
+    const submission = parseSubmission(body);
+    if (!submission) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
 
-    const trimmedTitle = typeof title === "string" ? title.trim() : "";
-    const trimmedLink = typeof link === "string" ? link.trim() : "";
-    const trimmedDescription = typeof description === "string" ? description.trim() : "";
-
-    if (!trimmedTitle || !trimmedLink || !trimmedDescription) {
+    if (!submission.title || !submission.link || !submission.description) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     try {
-      new URL(trimmedLink);
+      new URL(submission.link);
     } catch {
       return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
     }
 
-    const pat = process.env.GITHUB_PAT;
-    if (!pat) {
-      console.error("GITHUB_PAT is not set");
+    if (!process.env.DATABASE_URL) {
+      console.error("DATABASE_URL is not set");
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
     }
 
-    const resource: Resource = {
-      id: slugify(trimmedTitle),
-      title: trimmedTitle,
-      link: trimmedLink,
-      description: trimmedDescription,
-    };
+    await getDb().insert(resourceSubmissions).values({
+      title: submission.title,
+      link: submission.link,
+      description: submission.description,
+    });
 
-    const dispatchResponse = await fetch(
-      "https://api.github.com/repos/Claude-Builder-Club/asucbc/dispatches",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${pat}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          event_type: "add-resource",
-          client_payload: resource,
-        }),
-      }
-    );
-
-    if (!dispatchResponse.ok) {
-      const errorText = await dispatchResponse.text();
-      console.error("GitHub dispatch error", dispatchResponse.status, errorText);
-      return NextResponse.json({ error: "Failed to dispatch event" }, { status: 500 });
-    }
-
-    return NextResponse.json({ message: "Resource submitted for review" }, { status: 200 });
+    return NextResponse.json({ message: "Resource submitted" }, { status: 200 });
   } catch (error) {
     console.error("Resource submission error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
