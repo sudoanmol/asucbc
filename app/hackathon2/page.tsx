@@ -261,33 +261,33 @@ export default function Hackathon2() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             <TrackCard
-              icon="🤖"
-              title="AI-Powered Tools"
-              description="Build innovative applications leveraging Claude AI to solve real-world problems"
+              icon="🩺"
+              title="Biology & Physical Health"
+              description="Make healthcare more accessible or help people manage physical health"
               delay={0}
             />
             <TrackCard
-              icon="🎓"
-              title="Education & Learning"
-              description="Create tools that make learning more engaging, accessible, and personalized"
+              icon="🤖"
+              title="AI Tooling"
+              description="Build innovative developer tools, workflows, and infrastructure that make AI more useful, reliable, or accessible"
               delay={0.1}
             />
             <TrackCard
-              icon="🌍"
-              title="Social Impact"
-              description="Develop solutions that address community challenges and create positive change"
+              icon="📚"
+              title="Economic Empowerment & Education"
+              description="Remove barriers to learning and opportunity"
               delay={0.2}
             />
             <TrackCard
-              icon="💻"
-              title="Developer Experience"
-              description="Enhance productivity with tools that make developers' lives easier"
+              icon="🎨"
+              title="Creative Flourishing"
+              description="Amplify human creativity and help people find meaning"
               delay={0.3}
             />
             <TrackCard
-              icon="🎨"
-              title="Creative Tech"
-              description="Push boundaries with creative applications of AI in art, music, and design"
+              icon="🗳️"
+              title="Governance & Collaboration"
+              description="Help people participate in democracy or work together better"
               delay={0.4}
             />
             <TrackCard
