@@ -45,18 +45,18 @@ export const teamMembers: TeamMember[] = [
     image: "/staff/claude.svg",
   },
   {
-    id: "anjali",
-    name: "Anjali Kok",
-    position: "Vice President",
-    image: "/staff/claude.svg",
-  },
-  {
     id: "yuvam",
     name: "Yuvam Bhargav",
-    position: "Technology",
+    position: "Vice President",
     image: "/staff/claude.svg",
     linkedinUrl: "https://www.linkedin.com/in/yuvam-bh/",
     websiteUrl: "https://yuvambhargav.com/",
+  },
+  {
+    id: "anjali",
+    name: "Anjali Kok",
+    position: "Technology",
+    image: "/staff/claude.svg",
   },
   {
     id: "erick",
