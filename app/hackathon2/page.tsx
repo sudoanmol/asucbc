@@ -262,8 +262,8 @@ export default function Hackathon2() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             <TrackCard
               icon="🩺"
-              title="Biology & Physical Health"
-              description="Make healthcare more accessible or help people manage physical health"
+              title="Biology, Physical, & Mental Health"
+              description="Make healthcare more accessible or help people manage physical/mental health"
               delay={0}
             />
             <TrackCard
